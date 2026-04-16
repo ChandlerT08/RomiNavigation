@@ -89,6 +89,7 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
     print(f"starting to go straight. Target: {target_counts} counts.")
     print(encoder_helper.get_counts())
 
+    loop_count = 0
     while True:
         # Note: In standard a_star.py, encoders() returns a list
         encoders = encoder_helper.get_counts() 
@@ -111,14 +112,16 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
 
         correction = kP * heading
         
-        left_speed = int(base_speed - correction)
-        right_speed = int(base_speed + correction)
+        left_speed = base_speed - correction
+        right_speed = base_speed + correction
 
         left_speed = max(min(left_speed, 300), -300)
         right_speed = max(min(right_speed, 300) -300)
 
-        robot.motors(left_speed, right_speed)
+        if(loop_count % 5 == 0):
+            robot.motors(left_speed, right_speed)
 
+        loop_count += 0
         time.sleep(0.005)
 
     robot.motors(0, 0)
