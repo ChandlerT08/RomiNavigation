@@ -7,6 +7,35 @@ from smbus2 import SMBus # Ensure you have run: pip install smbus2
 # Define the robot
 romi = AStar()
 
+class RomiEncoder:
+    def __init__(self, robot):
+        self.robot = robot
+        self.offset_left = 0
+        self.offset_right = 0
+
+    def reset(self):
+        # Record current raw values as the new zero
+        raw = self.robot.read_encoders()
+        self.offset_left = raw[0]
+        self.offset_right = raw[1]
+
+    def get_counts(self):
+        raw = self.robot.read_encoders()
+        # Subtract the offset to get the distance traveled since last reset
+        rel_left = raw[0] - self.offset_left
+        rel_right = raw[1] - self.offset_right
+        
+        # This handles the 16-bit rollover (32767 -> -32768)
+        if rel_left > 32768: rel_left -= 65536
+        if rel_left < -32768: rel_left += 65536
+        if rel_right > 32768: rel_right -= 65536
+        if rel_right < -32768: rel_right += 65536
+            
+        return rel_left, rel_right
+
+# Initialize the helper
+encoder_helper = RomiEncoder(romi)
+
 # --- NEW: I2C Gyro Constants ---
 LSM6_ADDR = 0x6b
 CTRL2_G = 0x11
