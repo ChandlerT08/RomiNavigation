@@ -51,7 +51,7 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
         gx, gy, gz = robot.gyro()
         current_time = time.time()
         dt = current_time - last_time
-        last_time - current_time
+        last_time = current_time
 
         angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
         heading += angular_velocity * dt # Which adds the degrees we are off by
