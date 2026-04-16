@@ -74,21 +74,29 @@ def calibrate_gyro(samples=100):
     print("Calibration done.")
     return total / samples
 
+#def refresh_gyro_calibration(samples=50):
+#    GYRO_BIAS
+
 GYRO_BIAS = calibrate_gyro()
 
 def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
     target_counts = distance_mm / MM_PER_COUNT
-    robot.reset_encoders()
+    encoder_helper.reset()
 
     heading = 0
     last_time = time.time()
 
+    print(f"starting to go straight. Target: {target_counts} counts.")
+    print(encoder_helper.get_counts())
+
     while True:
         # Note: In standard a_star.py, encoders() returns a list
-        encoders = robot.read_encoders() 
+        encoders = encoder_helper.get_counts() 
         left, right = encoders[0], encoders[1]
         avg = (abs(left) + abs(right)) / 2
 
+        print(avg)
+        
         if avg >= target_counts:
             break
 
