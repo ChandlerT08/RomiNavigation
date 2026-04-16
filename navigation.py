@@ -12,6 +12,8 @@ class RomiEncoder:
         self.robot = robot
         self.offset_left = 0
         self.offset_right = 0
+        self.last_left = 0
+        self.last_right = 0
 
     def reset(self):
         # Record current raw values as the new zero
@@ -30,7 +32,13 @@ class RomiEncoder:
         if rel_left < -32768: rel_left += 65536
         if rel_right > 32768: rel_right -= 65536
         if rel_right < -32768: rel_right += 65536
-            
+
+        # Sanity Filter
+        if abs(rel_left - self.last_left) > 1000 or abs(rel_right - self.last_right) > 1000:
+            return self.last_left, self.last_right
+        
+        self.last_left = rel_left
+        self.last_right = rel_right
         return rel_left, rel_right
 
 # Initialize the helper
@@ -86,6 +94,11 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
     heading = 0
     last_time = time.time()
 
+    error_sum = 0
+    kI = 0.01
+    kD = 0.1
+    last_error = 0
+
     print(f"starting to go straight. Target: {target_counts} counts.")
     print(encoder_helper.get_counts())
 
@@ -111,7 +124,18 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
             angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
             heading += angular_velocity * dt 
 
-            correction = kP * heading
+            error = 0 - heading
+
+            error_sum += error * dt
+
+            if error_sum > 50: error_sum = 50
+            if error_sum < -50: error_sum = -50
+
+
+            derivative = (error - last_error) / dt if dt > 0 else 0
+            last_error = error
+
+            correction = (kP * error) + (kI * error_sum) + (kD *derivative)
             
             left_speed = int(base_speed - correction)
             right_speed = int(base_speed + correction)
