@@ -91,38 +91,41 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
 
     loop_count = 0
     while True:
-        # Note: In standard a_star.py, encoders() returns a list
-        encoders = encoder_helper.get_counts() 
-        left, right = encoders[0], encoders[1]
-        avg = (abs(left) + abs(right)) / 2
+        try:
+            # Note: In standard a_star.py, encoders() returns a list
+            encoders = encoder_helper.get_counts() 
+            left, right = encoders[0], encoders[1]
+            avg = (abs(left) + abs(right)) / 2
 
-        print(avg)
+            print(avg)
 
-        if avg >= target_counts:
-            break
+            if avg >= target_counts:
+                break
 
-        # Update Heading
-        gz = get_gyro_z_raw()
-        current_time = time.time()
-        dt = current_time - last_time
-        last_time = current_time
+            # Update Heading
+            gz = get_gyro_z_raw()
+            current_time = time.time()
+            dt = current_time - last_time
+            last_time = current_time
 
-        angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
-        heading += angular_velocity * dt 
+            angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
+            heading += angular_velocity * dt 
 
-        correction = kP * heading
-        
-        left_speed = base_speed - correction
-        right_speed = base_speed + correction
+            correction = kP * heading
+            
+            left_speed = int(base_speed - correction)
+            right_speed = int(base_speed + correction)
 
-        left_speed = max(min(left_speed, 300), -300)
-        right_speed = max(min(right_speed, 300) -300)
+            #left_speed = max(min(left_speed, 300), -300)
+            #right_speed = max(min(right_speed, 300) -300)
 
-        if(loop_count % 5 == 0):
-            robot.motors(left_speed, right_speed)
+            if(loop_count % 5 == 0):
+                robot.motors(left_speed, right_speed)
 
-        loop_count += 0
-        time.sleep(0.005)
+            loop_count += 0
+            time.sleep(0.005)
+        except OSError:
+            continue
 
     robot.motors(0, 0)
 
