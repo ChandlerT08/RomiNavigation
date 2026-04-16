@@ -96,7 +96,7 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
         avg = (abs(left) + abs(right)) / 2
 
         print(avg)
-        
+
         if avg >= target_counts:
             break
 
@@ -114,7 +114,12 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
         left_speed = int(base_speed - correction)
         right_speed = int(base_speed + correction)
 
+        left_speed = max(min(left_speed, 300), -300)
+        right_speed = max(min(right_speed, 300) -300)
+
         robot.motors(left_speed, right_speed)
+
+        time.sleep(0.005)
 
     robot.motors(0, 0)
 
@@ -141,5 +146,5 @@ def turn(robot, target_angle, speed=80):
     robot.motors(0,0)
 
 # Example usage:
-# go_straight(romi, 500) # Go 50cm
-# turn(romi, 90)         # Turn 90 degrees
+go_straight(romi, 500) # Go 50cm
+turn(romi, 90)         # Turn 90 degrees
