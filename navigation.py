@@ -147,8 +147,9 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.2):
             left_speed = int(base_speed - correction)
             right_speed = int(base_speed + correction)
 
-            #left_speed = max(min(left_speed, 300), -300)
-            #right_speed = max(min(right_speed, 300) -300)
+            # clamp values
+            left_speed = max(min(left_speed, 300), -300)
+            right_speed = max(min(right_speed, 300) -300)
 
             if(loop_count % 5 == 0):
                 robot.motors(left_speed, right_speed)
