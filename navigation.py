@@ -73,6 +73,9 @@ COUNTS_PER_REV = 1440
 WHEEL_CIRCUMFERENCE_MM = WHEEL_DIAMETER_MM * math.pi
 MM_PER_COUNT = WHEEL_CIRCUMFERENCE_MM / COUNTS_PER_REV
 
+DISTANCE_SCALE = 1.00
+TURN_SCALE = 0.97
+
 # Scale for 2000 dps is usually 0.070 for LSM6 chips
 GYRO_SCALE = 0.070 
 
@@ -90,7 +93,7 @@ def calibrate_gyro(samples=100):
 
 GYRO_BIAS = calibrate_gyro()
 
-def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
+def go_straight(robot, distance_mm, base_speed=100, kP=2.2):
     global GYRO_BIAS
     target_counts = distance_mm / MM_PER_COUNT
     encoder_helper.reset()
@@ -162,6 +165,8 @@ def turn(robot, target_angle, speed=80):
     robot.motors(0,0)
     time.sleep(0.2)
 
+    target_angle *= TURN_SCALE
+
     angle_turned = 0
     last_time = time.time()
     direction = 1 if target_angle > 0 else -1
@@ -170,13 +175,16 @@ def turn(robot, target_angle, speed=80):
     robot.motors(speed * direction, -speed * direction)
 
     while abs(angle_turned) < abs(target_angle):
-        gz = get_gyro_z_raw()
-        current_time = time.time()
-        dt = current_time - last_time
-        last_time = current_time
+        try:
+            gz = get_gyro_z_raw()
+            current_time = time.time()
+            dt = current_time - last_time
+            last_time = current_time
 
-        angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
-        angle_turned += angular_velocity * dt
+            angular_velocity = (gz - GYRO_BIAS) * GYRO_SCALE
+            angle_turned += angular_velocity * dt
+        except OSError:
+            continue
     
     robot.motors(0,0)
 
