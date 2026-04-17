@@ -21,6 +21,9 @@ class RomiEncoder:
         self.offset_left = raw[0]
         self.offset_right = raw[1]
 
+        self.last_left = 0
+        self.last_right = 0
+
     def get_counts(self):
         raw = self.robot.read_encoders()
         # Subtract the offset to get the distance traveled since last reset
@@ -88,6 +91,7 @@ def calibrate_gyro(samples=100):
 GYRO_BIAS = calibrate_gyro()
 
 def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
+    global GYRO_BIAS
     target_counts = distance_mm / MM_PER_COUNT
     encoder_helper.reset()
 
@@ -154,6 +158,7 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.0):
     robot.motors(0, 0)
 
 def turn(robot, target_angle, speed=80):
+    global GYRO_BIAS
     robot.motors(0,0)
     time.sleep(0.2)
 
