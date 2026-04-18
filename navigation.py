@@ -148,8 +148,8 @@ def go_straight(robot, distance_mm, base_speed=100, kP=2.2):
             right_speed = int(base_speed + correction)
 
             # clamp values
-            left_speed = max(min(left_speed, 300), -300)
-            right_speed = max(min(right_speed, 300) -300)
+            #left_speed = max(min(left_speed, 300), -300)
+            #right_speed = max(min(right_speed, 300) -300)
 
             if(loop_count % 5 == 0):
                 robot.motors(left_speed, right_speed)
@@ -190,5 +190,5 @@ def turn(robot, target_angle, speed=80):
     robot.motors(0,0)
 
 # Example usage:
-go_straight(romi, 500) # Go 50cm
+go_straight(romi, -500) # Go 50cm
 turn(romi, 90)         # Turn 90 degrees
